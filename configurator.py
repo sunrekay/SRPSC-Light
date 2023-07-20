@@ -6,7 +6,7 @@ import squid_conf
 # SETTINGS
 IPV6_QUANTITY: int = 0
 PORTS_BEGIN: int = 0
-ALLOW_IPS: list[str] = []
+ALLOW_IPS: list = []
 APPLICATIONS = [
     "ufw",
     "nano",
@@ -69,7 +69,7 @@ def enable_dns_via_ipv6():
                 "nameserver 8.8.4.4")
 
 
-def get_range_ipv6() -> list[str]:
+def get_range_ipv6():
     first_ipv6 = FIRST_IPV6.split(":")
     start_number_hex = first_ipv6[-1]
     start_number = int(start_number_hex, 16)
@@ -143,15 +143,21 @@ def restart_squid():
 
 
 def get_ipv6_for_squid_conf():
-    """Добавить определение первого ipv6"""
-    FIRST_IPV6 = "first_ipv6"
+    global FIRST_IPV6
+    console = subprocess.run(["ip", "addr"],
+                             stdout=subprocess.PIPE)
+    output = str(console)
+    ens3 = output[output.find("ens3"):]
+    inet6 = ens3[ens3.find("inet6")+5:]
+    first_ipv6 = inet6[: inet6.find("/")]
+    FIRST_IPV6 = first_ipv6.strip()
 
 
 def configurate_server():
     install_applications()
     check_network_status()
     enable_dns_via_ipv6()
-    get_ipv6_for_squid_conf() # TODO: CREATE FUNCTION!!!
+    get_ipv6_for_squid_conf()
     add_new_ipv6_in_interfaces()
     restart_network()
     check_new_ipv6_in_network()
