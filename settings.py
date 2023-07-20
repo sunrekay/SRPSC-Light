@@ -1,5 +1,0 @@
-APPLICATIONS = [
-    "ufw",
-    "nano",
-    "squid"
-]
