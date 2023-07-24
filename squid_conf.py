@@ -1,7 +1,8 @@
-def get_conf(boss_ip: str,
-             http_port: str,
+def get_conf(http_port: str,
              acl_port_localport: str,
-             tcp_outgoing_address: str):
+             tcp_outgoing_address: str,
+             users: str,
+             http_access: str):
     return f"""
 acl localnet src 0.0.0.1-0.255.255.255	# RFC 1122 "this" network (LAN)
 acl localnet src 10.0.0.0/8		# RFC 1918 local private network (LAN)
@@ -29,6 +30,8 @@ http_access deny !Safe_ports
 http_access allow localhost manager
 http_access deny manager
 
+no_cache deny all
+
 include /etc/squid/conf.d/*.conf
 
 http_access allow localnet
@@ -36,13 +39,18 @@ http_access allow localhost
 
 via off
 
-{boss_ip}
+auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd
 
 {http_port}
 
 {acl_port_localport}
 
 {tcp_outgoing_address}
+
+{users}
+
+{http_access}
+
 
 # And finally deny all other access to this proxy
 http_access deny all

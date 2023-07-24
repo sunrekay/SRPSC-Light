@@ -1,4 +1,5 @@
 import os
+import uuid
 import subprocess
 import squid_conf
 
@@ -17,6 +18,7 @@ APPLICATIONS = [
 
 # CONFIGURATOR WILL DO IT HIMSELF
 FIRST_IPV6: str = ""
+USERS_PASSWORDS: list = []
 
 
 class NetworkUnreachable(Exception):
@@ -116,25 +118,26 @@ def check_new_ipv6_in_network():
 
 @error_handler
 def edit_squid_conf():
-    boss_ip: str = ""
     http_port: str = ""
     acl_port_localport: str = ""
     tcp_outgoing_address: str = ""
-
-    for ip in ALLOW_IPS:
-        boss_ip += f"acl localnet src {ip}\n"
+    users: str = ""
+    http_access: str = ""
 
     range_ipv6 = get_range_ipv6()
     for i in range(len(range_ipv6)):
         http_port += f"http_port {PORTS_BEGIN+i}\n"
         acl_port_localport += f"acl port{i} localport {PORTS_BEGIN+i}\n"
         tcp_outgoing_address += f"tcp_outgoing_address {range_ipv6[i]} port{i}\n"
+        users += f"acl test{i}_user proxy_auth {USERS_PASSWORDS[i].split(':')[0]}\n"
+        http_access += f"http_access allow test{i}_user port{i}\n"
 
     with open("/etc/squid/squid.conf", "w") as f:
-        f.write(squid_conf.get_conf(boss_ip=boss_ip,
-                                    http_port=http_port,
+        f.write(squid_conf.get_conf(http_port=http_port,
                                     acl_port_localport=acl_port_localport,
-                                    tcp_outgoing_address=tcp_outgoing_address))
+                                    tcp_outgoing_address=tcp_outgoing_address,
+                                    users=users,
+                                    http_access=http_access))
 
 
 @error_handler
@@ -153,6 +156,29 @@ def get_ipv6_for_squid_conf():
     FIRST_IPV6 = first_ipv6.strip()
 
 
+@error_handler
+def install_apache2_utils():
+    os.system("apt-get install apache2-utils")
+
+
+@error_handler
+def create_users_passwords():
+    global USERS_PASSWORDS
+    for i in range(IPV6_QUANTITY):
+        user: str = f"user_{str(uuid.uuid4()).split('-')[4]}"
+        password: str = f"pass_{str(uuid.uuid4()).split('-')[4]}"
+        USERS_PASSWORDS.append(f"{user}:{password}")
+
+
+@error_handler
+def add_users_passwords_in_passwd():
+    os.system(f"htpasswd -cb /etc/squid/passwd {USERS_PASSWORDS[0].split(':')[0]} "
+              f"{USERS_PASSWORDS[0].split(':')[1]}")
+    for i in range(1, IPV6_QUANTITY):
+        os.system(f"htpasswd -b /etc/squid/passwd {USERS_PASSWORDS[i].split(':')[0]} "
+                  f"{USERS_PASSWORDS[i].split(':')[1]}")
+
+
 def configurate_server():
     install_applications()
     check_network_status()
@@ -161,7 +187,10 @@ def configurate_server():
     add_new_ipv6_in_interfaces()
     restart_network()
     check_new_ipv6_in_network()
+    create_users_passwords()
     edit_squid_conf()
+    install_apache2_utils()
+    add_users_passwords_in_passwd()
     restart_squid()
 
 
