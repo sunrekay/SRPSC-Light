@@ -131,6 +131,7 @@ def edit_squid_conf():
         tcp_outgoing_address += f"tcp_outgoing_address {range_ipv6[i]} port{i}\n"
         users += f"acl test{i}_user proxy_auth {USERS_PASSWORDS[i].split(':')[0]}\n"
         http_access += f"http_access allow test{i}_user port{i}\n"
+        print(f"{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
 
     with open("/etc/squid/squid.conf", "w") as f:
         f.write(squid_conf.get_conf(http_port=http_port,
