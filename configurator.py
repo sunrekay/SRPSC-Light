@@ -7,7 +7,7 @@ import squid_conf
 # SETTINGS
 IPV6_QUANTITY: int = 0
 PORTS_BEGIN: int = 0
-ALLOW_IPS: list = []
+NETWORK_NAME: str = "ens3"
 APPLICATIONS = [
     "ufw",
     "nano",
@@ -52,6 +52,7 @@ def error_handler(func):
 def install_applications():
     for application in APPLICATIONS:
         os.system(f"apt install {application}")
+    os.system("apt-get install apache2-utils")
 
 
 @error_handler
@@ -93,7 +94,7 @@ def add_new_ipv6_in_interfaces():
 
     range_ipv6 = get_range_ipv6()
     for ipv6 in range_ipv6:
-        interfaces += f"iface ens3 inet6 static\n" \
+        interfaces += f"iface {NETWORK_NAME} inet6 static\n" \
                       f"    address {ipv6}\n" \
                       f"    netmask 32\n"
 
@@ -103,7 +104,7 @@ def add_new_ipv6_in_interfaces():
 
 @error_handler
 def restart_network():
-    os.system("ifdown ens3 && ifup ens3")
+    os.system(f"ifdown {NETWORK_NAME} && ifup {NETWORK_NAME}")
 
 
 @error_handler
@@ -123,6 +124,7 @@ def edit_squid_conf():
     tcp_outgoing_address: str = ""
     users: str = ""
     http_access: str = ""
+    auth_data: list = []
 
     range_ipv6 = get_range_ipv6()
     for i in range(len(range_ipv6)):
@@ -131,7 +133,7 @@ def edit_squid_conf():
         tcp_outgoing_address += f"tcp_outgoing_address {range_ipv6[i]} port{i}\n"
         users += f"acl test{i}_user proxy_auth {USERS_PASSWORDS[i].split(':')[0]}\n"
         http_access += f"http_access allow test{i}_user port{i}\n"
-        print(f"{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
+        auth_data.append(f"{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
 
     with open("/etc/squid/squid.conf", "w") as f:
         f.write(squid_conf.get_conf(http_port=http_port,
@@ -139,6 +141,9 @@ def edit_squid_conf():
                                     tcp_outgoing_address=tcp_outgoing_address,
                                     users=users,
                                     http_access=http_access))
+
+    with open("auth", "w") as f:
+        f.write("\n".join(auth_data))
 
 
 @error_handler
@@ -151,15 +156,10 @@ def get_ipv6_for_squid_conf():
     console = subprocess.run(["ip", "addr"],
                              stdout=subprocess.PIPE)
     output = str(console)
-    ens3 = output[output.find("ens3"):]
+    ens3 = output[output.find(NETWORK_NAME):]
     inet6 = ens3[ens3.find("inet6")+5:]
     first_ipv6 = inet6[: inet6.find("/")]
     FIRST_IPV6 = first_ipv6.strip()
-
-
-@error_handler
-def install_apache2_utils():
-    os.system("apt-get install apache2-utils")
 
 
 @error_handler
@@ -190,7 +190,6 @@ def configurate_server():
     check_new_ipv6_in_network()
     create_users_passwords()
     edit_squid_conf()
-    install_apache2_utils()
     add_users_passwords_in_passwd()
     restart_squid()
 
