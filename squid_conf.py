@@ -51,10 +51,6 @@ auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd
 
 {http_access}
 
-
 # And finally deny all other access to this proxy
 http_access deny all
-
-# Squid normally listens to port 3128
-http_port 3128
 """

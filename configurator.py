@@ -1,4 +1,5 @@
 import os
+import db
 import uuid
 import subprocess
 import squid_conf
@@ -7,7 +8,12 @@ import squid_conf
 # SETTINGS
 IPV6_QUANTITY: int = 0
 PORTS_BEGIN: int = 0
-NETWORK_NAME: str = "ens3"
+NETWORK_NAME: str = ""
+DB_AUTH: dict = {
+    "host": "",
+    "user": "",
+    "password": ""
+}
 APPLICATIONS = [
     "ufw",
     "nano",
@@ -17,6 +23,7 @@ APPLICATIONS = [
 
 
 # CONFIGURATOR WILL DO IT HIMSELF
+IPV4: str = ""
 FIRST_IPV6: str = ""
 USERS_PASSWORDS: list = []
 
@@ -133,7 +140,7 @@ def edit_squid_conf():
         tcp_outgoing_address += f"tcp_outgoing_address {range_ipv6[i]} port{i}\n"
         users += f"acl test{i}_user proxy_auth {USERS_PASSWORDS[i].split(':')[0]}\n"
         http_access += f"http_access allow test{i}_user port{i}\n"
-        auth_data.append(f"{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
+        auth_data.append(f"{IPV4}:{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
 
     with open("/etc/squid/squid.conf", "w") as f:
         f.write(squid_conf.get_conf(http_port=http_port,
@@ -152,6 +159,7 @@ def restart_squid():
 
 
 def get_ipv6_for_squid_conf():
+    global IPV4
     global FIRST_IPV6
     console = subprocess.run(["ip", "addr"],
                              stdout=subprocess.PIPE)
@@ -160,6 +168,8 @@ def get_ipv6_for_squid_conf():
     inet6 = ens3[ens3.find("inet6")+5:]
     first_ipv6 = inet6[: inet6.find("/")]
     FIRST_IPV6 = first_ipv6.strip()
+    inet = ens3[ens3.find("inet")+4:]
+    IPV4 = inet[:inet.find("/")].strip()
 
 
 @error_handler
@@ -180,6 +190,15 @@ def add_users_passwords_in_passwd():
                   f"{USERS_PASSWORDS[i].split(':')[1]}")
 
 
+def send_proxy_in_db():
+    for i in range(0, IPV6_QUANTITY):
+        db.send_proxy(ip=IPV4,
+                      port=f"{PORTS_BEGIN+i}",
+                      login=USERS_PASSWORDS[i].split(':')[0],
+                      password=USERS_PASSWORDS[i].split(':')[1])
+        print(f"{IPV4}:{PORTS_BEGIN+i}:{USERS_PASSWORDS[i]}")
+
+
 def configurate_server():
     install_applications()
     check_network_status()
@@ -191,6 +210,7 @@ def configurate_server():
     create_users_passwords()
     edit_squid_conf()
     add_users_passwords_in_passwd()
+    send_proxy_in_db()
     restart_squid()
 
 
