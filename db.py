@@ -1,5 +1,5 @@
 from mysql.connector import connect, Error
-from configurator import DB_AUTH
+from settings import DB_AUTH
 
 
 def get_all_proxy():

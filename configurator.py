@@ -4,22 +4,8 @@ import uuid
 import subprocess
 import squid_conf
 
-
-# SETTINGS
-IPV6_QUANTITY: int = 0
-PORTS_BEGIN: int = 0
-NETWORK_NAME: str = ""
-DB_AUTH: dict = {
-    "host": "",
-    "user": "",
-    "password": ""
-}
-APPLICATIONS = [
-    "ufw",
-    "nano",
-    "dnsutils",
-    "squid"
-]
+from settings import IPV6_QUANTITY, PORTS_BEGIN,\
+                     APPLICATIONS, NETWORK_NAME
 
 
 # CONFIGURATOR WILL DO IT HIMSELF
