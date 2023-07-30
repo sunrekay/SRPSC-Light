@@ -51,6 +51,5 @@ auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd
 
 {http_access}
 
-# And finally deny all other access to this proxy
 http_access deny all
 """
