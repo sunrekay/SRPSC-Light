@@ -5,7 +5,7 @@ import subprocess
 import squid_conf
 
 from settings import IPV6_QUANTITY, PORTS_BEGIN,\
-                     APPLICATIONS, NETWORK_NAME
+                     APPLICATIONS, NETWORK_NAME, DB_AUTH
 
 
 # CONFIGURATOR WILL DO IT HIMSELF
@@ -177,6 +177,8 @@ def add_users_passwords_in_passwd():
 
 
 def send_proxy_in_db():
+    if not DB_AUTH['host']:
+        return
     for i in range(0, IPV6_QUANTITY):
         db.send_proxy(ip=IPV4,
                       port=f"{PORTS_BEGIN+i}",
