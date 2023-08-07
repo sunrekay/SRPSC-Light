@@ -39,6 +39,8 @@ http_access allow localhost
 
 via off
 
+forwarded_for delete
+
 auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd
 
 {http_port}
