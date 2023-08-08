@@ -8,9 +8,8 @@ DB_AUTH: dict = {
     "password": ""
 }
 
-APPLICATIONS = [
+APPLICATIONS: list = [
     "ufw",
-    "nano",
     "dnsutils",
     "squid"
 ]
