@@ -19,7 +19,7 @@ All actions are performed on behalf of the __root__ user
 
 After connecting to the VPS, update and upgrade OS:
 ```
-apt-get install update --force-yes -y && apt-get install upgrade --force-yes -y
+apt-get update --force-yes -y && apt-get upgrade --force-yes -y
 ```
 Install Git:
 ```
