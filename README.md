@@ -1,6 +1,7 @@
 # Surendoy Remote Proxy-Server Configurator Light
-__SRPSС Light__ is software allows you to quickly configure a vps for a proxy server with 120 unique ipv6 addresses for connection and 
+__SRPSС Light__ is a software that allows to quickly configure a vps as a proxy server with more than 100 ipv6-addresses to use and 
 the ability to upload authentication data to a MySQL database.
+
 
 ## How to choose a vps?
 __VPS Requirement:__
