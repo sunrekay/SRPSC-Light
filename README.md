@@ -45,3 +45,6 @@ python configurator.py
 
 After configuring the vps, the authentication data is saved in the "auth" file, but if you need to upload the data to the MySQL database, 
 then in the settings.py it is necessary to specify the data for connection.
+
+## Important
+It is necessary to __reinstall the OS on the vps__, in case the __program is stopped during execution__.
