@@ -27,11 +27,11 @@ apt-get install git --force-yes -y
 ```
 Clone repository:
 ```
-git clone https://github.com/sunrekay/proxy-server
+git clone https://github.com/sunrekay/SRPSС-Light
 ```
 Go inside the folder:
 ```
-cd proxy-server
+cd SRPSС-Light
 ```
 Install requirements:
 ```
