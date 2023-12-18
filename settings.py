@@ -1,5 +1,5 @@
-IPV6_QUANTITY: int = 0
-PORTS_BEGIN: int = 0
+IPV6_QUANTITY: int = 120
+PORTS_BEGIN: int = 14000
 NETWORK_NAME: str = "ens3"
 
 DB_AUTH: dict = {
