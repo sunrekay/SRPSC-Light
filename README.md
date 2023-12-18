@@ -1,11 +1,6 @@
-# Surendoy Remote Proxy-Server Configurator
-
-__SRPSС__ is a software that allows to remotely configure a vps as a proxy server with __more than 1000 ipv6-addresses__ to use.
-
-## How it works?
-__SRPSC__ connects to the vps, prepares the network interface and adds new ipv6. Next, it downloads and build squid-4.10 from the source files, creates a squid.conf file and uploads it, then runs squid.
-
-Returns a list of strings with data for connecting to the proxy.
+# Surendoy Remote Proxy-Server Configurator Light
+__SRPSС Light__ is software allows you to quickly configure a vps for a proxy server with 120 unique ipv6 addresses for connection and 
+the ability to upload authentication data to a MySQL database.
 
 ## How to choose a vps?
 __VPS Requirement:__
@@ -18,7 +13,34 @@ __Verified hosters:__
  - [pq.hosting](https://pq.hosting/)
  - ...
 
-## Important
-The average vps configuration time is __40-60 minutes__.
+## Quick start
+All actions are performed on behalf of the __root__ user
 
-It is necessary to __reinstall the OS on the vps__, in case the __program is stopped during execution__.
+
+After connecting to the VPS, update and upgrade OS:
+```
+apt-get install update --force-yes -y && apt-get install upgrade --force-yes -y
+```
+Install Git:
+```
+apt-get install git --force-yes -y
+```
+Clone repository:
+```
+git clone https://github.com/sunrekay/proxy-server
+```
+Go inside the folder:
+```
+cd proxy-server
+```
+Install requirements:
+```
+pip install -r requirements.txt
+```
+And start configuration:
+```
+python configurator.py
+```
+
+After configuring the vps, the authentication data is saved in the "auth" file, but if you need to upload the data to the MySQL database, 
+then in the settings.py it is necessary to specify the data for connection.
